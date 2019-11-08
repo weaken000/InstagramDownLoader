@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="5uz-ck-mhT">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="hK4-7l-dal">
+            <objects>
+                <navigationController id="5uz-ck-mhT" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="15n-RH-mgJ">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="JmM-ZM-IfO" kind="relationship" relationship="rootViewController" id="UOQ-tp-SeO"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="i0y-eE-apV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3123" y="52"/>
+        </scene>
+        <!--Youtube View Controller-->
+        <scene sceneID="DpO-mL-uAz">
+            <objects>
+                <viewController storyboardIdentifier="youtube" useStoryboardIdentifierAsRestorationIdentifier="YES" id="L30-E1-fzQ" customClass="YoutubeViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="9JQ-hU-j32">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="请输入网址" textAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="qJc-p8-5Lc">
+                                <rect key="frame" x="50" y="94" width="314" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="RIb-cH-xNs"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="r7r-Kn-7gU">
+                                <rect key="frame" x="162" y="158" width="90" height="40"/>
+                                <color key="backgroundColor" systemColor="systemGreenColor" red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="BbZ-wO-XyR"/>
+                                    <constraint firstAttribute="width" constant="90" id="IH9-Rv-s5D"/>
+                                </constraints>
+                                <state key="normal" title="下载">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                            </button>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="UXW-4L-fJn">
+                                <rect key="frame" x="0.0" y="228" width="414" height="634"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="vOI-7L-KKV" firstAttribute="bottom" secondItem="UXW-4L-fJn" secondAttribute="bottom" id="3ek-MB-Y1h"/>
+                            <constraint firstItem="qJc-p8-5Lc" firstAttribute="top" secondItem="vOI-7L-KKV" secondAttribute="top" constant="50" id="9gH-pd-PEb"/>
+                            <constraint firstItem="vOI-7L-KKV" firstAttribute="trailing" secondItem="UXW-4L-fJn" secondAttribute="trailing" id="IOW-t8-xRl"/>
+                            <constraint firstItem="UXW-4L-fJn" firstAttribute="top" secondItem="r7r-Kn-7gU" secondAttribute="bottom" constant="30" id="NK2-Eb-0vg"/>
+                            <constraint firstItem="r7r-Kn-7gU" firstAttribute="centerX" secondItem="9JQ-hU-j32" secondAttribute="centerX" id="QQ3-zU-Mfj"/>
+                            <constraint firstItem="qJc-p8-5Lc" firstAttribute="leading" secondItem="vOI-7L-KKV" secondAttribute="leading" constant="50" id="ZzV-CG-lMw"/>
+                            <constraint firstItem="vOI-7L-KKV" firstAttribute="trailing" secondItem="qJc-p8-5Lc" secondAttribute="trailing" constant="50" id="law-i7-54v"/>
+                            <constraint firstItem="r7r-Kn-7gU" firstAttribute="top" secondItem="qJc-p8-5Lc" secondAttribute="bottom" constant="20" id="uuu-G2-gDP"/>
+                            <constraint firstItem="UXW-4L-fJn" firstAttribute="leading" secondItem="vOI-7L-KKV" secondAttribute="leading" id="yr3-L3-6nH"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="vOI-7L-KKV"/>
+                    </view>
+                    <connections>
+                        <outlet property="downloadButton" destination="r7r-Kn-7gU" id="uIm-9A-TPt"/>
+                        <outlet property="tableView" destination="UXW-4L-fJn" id="n69-Kf-Pwy"/>
+                        <outlet property="urlTF" destination="qJc-p8-5Lc" id="ryl-o0-8cp"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cKK-RP-wNj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1317" y="52"/>
+        </scene>
+        <!--Image Load View Controller-->
+        <scene sceneID="OjC-77-VUq">
+            <objects>
+                <viewController id="JmM-ZM-IfO" customClass="ImageLoadViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="kbL-g1-6l5">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="lej-0I-hQD"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="H0K-Ts-Vu4"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xwd-t2-YbQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2259" y="52"/>
+        </scene>
+    </scenes>
+</document>
