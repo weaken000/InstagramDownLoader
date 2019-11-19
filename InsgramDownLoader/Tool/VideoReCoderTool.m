@@ -9,6 +9,7 @@
 
 #import "VideoReCoderTool.h"
 #import <AVFoundation/AVFoundation.h>
+#import <Accelerate/Accelerate.h>
 
 @interface VideoReCoderTool()
 
@@ -34,7 +35,10 @@
  
 @end
 
-@implementation VideoReCoderTool
+@implementation VideoReCoderTool {
+//    CGFloat _videoH;
+//    CGFloat _videoW;
+}
 
 
 + (instancetype)startWithURL:(NSURL *)url complete:(void (^)(BOOL, NSURL * _Nullable))complete {
@@ -157,6 +161,9 @@
             } else {
                 trackDimensions = [assetVideoTrack naturalSize];
             }
+//            _videoW = trackDimensions.width;
+//            _videoH = trackDimensions.height;
+//
             NSDictionary *compressionSettings = nil;
             if (formatDescription) {
                 NSDictionary *cleanAperture = nil;
@@ -409,6 +416,41 @@
 //
 //    elapsedTime = CFAbsoluteTimeGetCurrent() - startTime;
 //    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//}
+
+//- (void)sizeFitBuffer:(CMSampleBufferRef)sampleBuffer {
+//
+//    int outWidth, outHeight;
+//
+//    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+//    CVPixelBufferLockBaseAddress(imageBuffer, 0);
+//    void * baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+//    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+//
+//
+//    vImage_Buffer inBuff;
+//    inBuff.height = _videoH;
+//    inBuff.width = _videoW;
+//    inBuff.rowBytes = bytesPerRow;
+//
+////    int startpos = cropY0 * bytesPerRow + 4 * cropX0;
+//    int startpos = _videoH / 2 * bytesPerRow;
+//    inBuff.data = baseAddress + startpos;
+//
+//    outWidth = _videoW;
+//    outHeight = _videoH / 2;
+//    unsigned char *outImg = (unsigned char *)malloc(4 * outWidth * outHeight);
+//    vImage_Buffer outBuff = {outImg, outHeight, outWidth, 4 * outWidth};
+//
+//    vImage_Error err = vImageScale_ARGB8888(&inBuff, &outBuff, NULL, 0);
+//    if (err != kvImageNoError) {
+//        NSLog(@"发生了错误");
+//    }
+////    if (err != kvImageNoError) {
+////
+////    } else {
+////        return sampleBuffer;
+////    }
 //}
 
 

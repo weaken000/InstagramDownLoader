@@ -35,10 +35,12 @@ WKDownLoadManagerDelegate
     _tableView.dataSource = self;
     [self.view addSubview:_tableView];
     
-    
-    [WKDownLoadManager share].type = WKDownLoadTypeIns;
     [WKDownLoadManager share].delegate = self;
-    [WKDownLoadManager share].urls = self.urls;
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+    [button setTitle:@"清空已下载" forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(click_clear) forControlEvents:UIControlEventTouchUpInside];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
 }
 
 - (void)viewWillLayoutSubviews {
@@ -46,6 +48,9 @@ WKDownLoadManagerDelegate
     _tableView.frame = self.view.bounds;
 }
 
+- (void)click_clear {
+    [[WKDownLoadManager share] clear];
+}
 
 #pragma mark - WKDownLoadManagerDelegate
 - (void)downloadManagerDidUpdateTask:(WKDownLoadManager *)manager {
@@ -56,6 +61,7 @@ WKDownLoadManagerDelegate
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 3;
 }
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (section == 0) {
         return [WKDownLoadManager share].activeTasks.count;

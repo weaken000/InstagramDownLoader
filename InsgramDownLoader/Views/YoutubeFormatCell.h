@@ -21,10 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface YoutubeFormatCell : UITableViewCell
 
 @property (nonatomic, weak) id<YoutubeFormatCellDelegate> delegate;
-//
-//- (void)configWithFormat:(NSDictionary *)format;
-//
-//- (void)configTask:(VideoTaskModel * _Nullable)task;
 
 - (void)configTask:(WKDownLoadTask *)task;
 

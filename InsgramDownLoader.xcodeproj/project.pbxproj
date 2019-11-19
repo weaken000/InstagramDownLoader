@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04116DC52383ED0300D8BA48 /* WKUrlToModelTransform.m in Sources */ = {isa = PBXBuildFile; fileRef = 04116DC42383ED0300D8BA48 /* WKUrlToModelTransform.m */; };
 		0437E80C2368044F00C8B885 /* VideoReCoderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 0437E80B2368044F00C8B885 /* VideoReCoderTool.m */; };
 		045A28BE2373BF750012EB28 /* WKDownLoadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A28BD2373BF750012EB28 /* WKDownLoadManager.m */; };
 		045A28C12373BFA90012EB28 /* WKDownLoadTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A28C02373BFA90012EB28 /* WKDownLoadTask.m */; };
 		046C63B123716668009BFE4A /* YoutubeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046C63B023716668009BFE4A /* YoutubeViewController.m */; };
 		048120A9237195D200B4056D /* YoutubeFormatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 048120A8237195D200B4056D /* YoutubeFormatCell.m */; };
 		048FFD0A235884BF00AC61EF /* DownloadProgressViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 048FFD09235884BF00AC61EF /* DownloadProgressViewController.m */; };
-		04A78E17235831CE000E1A58 /* ImageLoadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A78E16235831CE000E1A58 /* ImageLoadViewController.m */; };
+		04A78E17235831CE000E1A58 /* InstagramViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A78E16235831CE000E1A58 /* InstagramViewController.m */; };
 		04C803122351A069005464B5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C803112351A069005464B5 /* AppDelegate.m */; };
 		04C8031B2351A069005464B5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04C803192351A069005464B5 /* Main.storyboard */; };
 		04C8031D2351A06B005464B5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04C8031C2351A06B005464B5 /* Assets.xcassets */; };
@@ -44,6 +45,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04116DC32383ED0300D8BA48 /* WKUrlToModelTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKUrlToModelTransform.h; sourceTree = "<group>"; };
+		04116DC42383ED0300D8BA48 /* WKUrlToModelTransform.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKUrlToModelTransform.m; sourceTree = "<group>"; };
 		0437E80A2368044F00C8B885 /* VideoReCoderTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoReCoderTool.h; sourceTree = "<group>"; };
 		0437E80B2368044F00C8B885 /* VideoReCoderTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoReCoderTool.m; sourceTree = "<group>"; };
 		045A28BC2373BF750012EB28 /* WKDownLoadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKDownLoadManager.h; sourceTree = "<group>"; };
@@ -56,8 +59,8 @@
 		048120A8237195D200B4056D /* YoutubeFormatCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YoutubeFormatCell.m; sourceTree = "<group>"; };
 		048FFD08235884BF00AC61EF /* DownloadProgressViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadProgressViewController.h; sourceTree = "<group>"; };
 		048FFD09235884BF00AC61EF /* DownloadProgressViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadProgressViewController.m; sourceTree = "<group>"; };
-		04A78E15235831CE000E1A58 /* ImageLoadViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageLoadViewController.h; sourceTree = "<group>"; };
-		04A78E16235831CE000E1A58 /* ImageLoadViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImageLoadViewController.m; sourceTree = "<group>"; };
+		04A78E15235831CE000E1A58 /* InstagramViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InstagramViewController.h; sourceTree = "<group>"; };
+		04A78E16235831CE000E1A58 /* InstagramViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InstagramViewController.m; sourceTree = "<group>"; };
 		04C8030D2351A069005464B5 /* InsgramDownLoader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InsgramDownLoader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04C803102351A069005464B5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		04C803112351A069005464B5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -108,8 +111,8 @@
 		046C63B223718B04009BFE4A /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
-				04A78E15235831CE000E1A58 /* ImageLoadViewController.h */,
-				04A78E16235831CE000E1A58 /* ImageLoadViewController.m */,
+				04A78E15235831CE000E1A58 /* InstagramViewController.h */,
+				04A78E16235831CE000E1A58 /* InstagramViewController.m */,
 				048FFD08235884BF00AC61EF /* DownloadProgressViewController.h */,
 				048FFD09235884BF00AC61EF /* DownloadProgressViewController.m */,
 				046C63AF23716668009BFE4A /* YoutubeViewController.h */,
@@ -149,6 +152,8 @@
 				045A28BD2373BF750012EB28 /* WKDownLoadManager.m */,
 				045A28BF2373BFA90012EB28 /* WKDownLoadTask.h */,
 				045A28C02373BFA90012EB28 /* WKDownLoadTask.m */,
+				04116DC32383ED0300D8BA48 /* WKUrlToModelTransform.h */,
+				04116DC42383ED0300D8BA48 /* WKUrlToModelTransform.m */,
 			);
 			path = Download;
 			sourceTree = "<group>";
@@ -347,8 +352,9 @@
 				045A28C12373BFA90012EB28 /* WKDownLoadTask.m in Sources */,
 				04C803502351CD5C005464B5 /* MissionCell.m in Sources */,
 				04E03DBE236938720047FC43 /* PhotosTool.m in Sources */,
+				04116DC52383ED0300D8BA48 /* WKUrlToModelTransform.m in Sources */,
 				046C63B123716668009BFE4A /* YoutubeViewController.m in Sources */,
-				04A78E17235831CE000E1A58 /* ImageLoadViewController.m in Sources */,
+				04A78E17235831CE000E1A58 /* InstagramViewController.m in Sources */,
 				045A28BE2373BF750012EB28 /* WKDownLoadManager.m in Sources */,
 				04C803232351A06B005464B5 /* main.m in Sources */,
 			);

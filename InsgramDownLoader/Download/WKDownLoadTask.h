@@ -24,19 +24,29 @@ typedef NS_ENUM(NSUInteger, WKTaskStatus) {
     WKTaskStatusSaveFailure //保存失败
 };
 
-@interface WKDownLoadTask : NSObject
+typedef NS_ENUM(NSUInteger, WKMediaType) {
+    WKMediaTypeInstagramImage,
+    WKMediaTypeInstagramVideo,
+    WKMediaTypeYoutubeVideo,
+};
 
-@property (nonatomic, strong) NSURLSessionDownloadTask *task;
+@interface WKDownLoadTask : NSObject<NSCoding>
+
+@property (nonatomic, strong, nullable) NSURLSessionDownloadTask *task;
+@property (nonatomic,   copy, nullable) NSString *url;
+@property (nonatomic,   copy, nullable) NSString *error;
+@property (nonatomic,   copy, nullable) NSString *desc;
+@property (nonatomic,   copy, nullable) NSString *filePath;
+@property (nonatomic, strong, nullable) NSData   *resumeData;
+@property (nonatomic, assign) double       progress;
 @property (nonatomic, assign) WKTaskStatus status;
-@property (nonatomic,   copy) NSString *url;
-@property (nonatomic,   copy) NSString *error;
-@property (nonatomic,   copy) NSString *desc;
-@property (nonatomic,   copy) NSString *filePath;
-@property (nonatomic, assign) double progress;
+@property (nonatomic, assign) WKMediaType  mediaType;
 
 @property (nonatomic,   copy, nullable) void (^ update)(WKDownLoadTask *task);
 
 - (void)clear;
+
+- (void)save;
 
 @end
 

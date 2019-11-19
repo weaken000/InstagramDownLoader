@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="5uz-ck-mhT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ZYY-zj-0KR">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -8,10 +8,11 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Navigation Controller-->
+        <!--Instagram-->
         <scene sceneID="hK4-7l-dal">
             <objects>
                 <navigationController id="5uz-ck-mhT" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Instagram" id="tIA-1g-tA6"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="15n-RH-mgJ">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -22,7 +23,24 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="i0y-eE-apV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-3123" y="52"/>
+            <point key="canvasLocation" x="-2193" y="-779"/>
+        </scene>
+        <!--Youtube-->
+        <scene sceneID="9HU-Uh-YOX">
+            <objects>
+                <navigationController id="cR4-Qh-c1Y" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Youtube" id="qzq-9z-oIY"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="A52-Ia-vek">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="L30-E1-fzQ" kind="relationship" relationship="rootViewController" id="QRR-Xw-26T"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="BUa-ac-0t1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2194" y="-94"/>
         </scene>
         <!--Youtube View Controller-->
         <scene sceneID="DpO-mL-uAz">
@@ -33,7 +51,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="请输入网址" textAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="qJc-p8-5Lc">
-                                <rect key="frame" x="50" y="94" width="314" height="44"/>
+                                <rect key="frame" x="50" y="138" width="314" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="RIb-cH-xNs"/>
                                 </constraints>
@@ -41,8 +59,8 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="r7r-Kn-7gU">
-                                <rect key="frame" x="162" y="158" width="90" height="40"/>
-                                <color key="backgroundColor" systemColor="systemGreenColor" red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <rect key="frame" x="162" y="202" width="90" height="40"/>
+                                <color key="backgroundColor" systemColor="systemGreenColor" red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="BbZ-wO-XyR"/>
                                     <constraint firstAttribute="width" constant="90" id="IH9-Rv-s5D"/>
@@ -52,7 +70,7 @@
                                 </state>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="UXW-4L-fJn">
-                                <rect key="frame" x="0.0" y="228" width="414" height="634"/>
+                                <rect key="frame" x="0.0" y="272" width="414" height="541"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                             </tableView>
                         </subviews>
@@ -70,6 +88,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="vOI-7L-KKV"/>
                     </view>
+                    <navigationItem key="navigationItem" id="T1J-1N-j1e"/>
                     <connections>
                         <outlet property="downloadButton" destination="r7r-Kn-7gU" id="uIm-9A-TPt"/>
                         <outlet property="tableView" destination="UXW-4L-fJn" id="n69-Kf-Pwy"/>
@@ -78,12 +97,31 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cKK-RP-wNj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1317" y="52"/>
+            <point key="canvasLocation" x="-1288" y="-94"/>
         </scene>
-        <!--Image Load View Controller-->
+        <!--Tab Bar Controller-->
+        <scene sceneID="9Kr-b9-s3K">
+            <objects>
+                <tabBarController id="ZYY-zj-0KR" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="R2R-QR-owa">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="5uz-ck-mhT" kind="relationship" relationship="viewControllers" id="Zye-H7-h6x"/>
+                        <segue destination="cR4-Qh-c1Y" kind="relationship" relationship="viewControllers" id="jUf-Gm-AZe"/>
+                        <segue destination="DUM-cN-jkB" kind="relationship" relationship="viewControllers" id="7Fb-Xk-8So"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="wQF-B3-U2E" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3226" y="-408"/>
+        </scene>
+        <!--Instagram View Controller-->
         <scene sceneID="OjC-77-VUq">
             <objects>
-                <viewController id="JmM-ZM-IfO" customClass="ImageLoadViewController" sceneMemberID="viewController">
+                <viewController id="JmM-ZM-IfO" customClass="InstagramViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="kbL-g1-6l5">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -94,7 +132,40 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xwd-t2-YbQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2259" y="52"/>
+            <point key="canvasLocation" x="-1288" y="-779"/>
+        </scene>
+        <!--loading-->
+        <scene sceneID="Z1X-ib-1AQ">
+            <objects>
+                <navigationController id="DUM-cN-jkB" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="loading" id="8iT-ag-qQk"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="dUE-RX-UP8">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="Tzd-nR-PTX" kind="relationship" relationship="rootViewController" id="XP8-Ld-xeM"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="yf8-oW-6GV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2194" y="690"/>
+        </scene>
+        <!--Download Progress View Controller-->
+        <scene sceneID="spa-Pk-Ewj">
+            <objects>
+                <viewController id="Tzd-nR-PTX" customClass="DownloadProgressViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Lop-4z-x1W">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="FH6-Ly-KsO"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="uJb-IO-A9o"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="E90-9g-ZW9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1288" y="690"/>
         </scene>
     </scenes>
 </document>

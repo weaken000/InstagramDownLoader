@@ -10,6 +10,8 @@
 
 @class WKDownLoadTask;
 
+#define WK_TASK_PATH [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"tasks"]
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum : NSUInteger {
@@ -32,10 +34,6 @@ typedef enum : NSUInteger {
 @property (nonatomic, strong, readonly) NSURLSession *session;
 
 @property (nonatomic,   copy) void (^ completionHandler)(void);
-/// 下载的地址
-@property (nonatomic, strong) NSArray<NSString *> *urls;
-/// 下载类型
-@property (nonatomic, assign) WKDownLoadType type;
 /// 下载中的任务
 @property (nonatomic, strong, readonly) NSMutableArray<WKDownLoadTask *> *activeTasks;
 /// 下载完成的任务
@@ -51,6 +49,10 @@ typedef enum : NSUInteger {
 
 + (instancetype)share;
 
+/// 添加单个项目
+- (void)addTask:(WKDownLoadTask *)task;
+/// 添加多个下载项目
+- (void)addTasks:(NSArray<WKDownLoadTask *> *)tasks;
 /// 暂停任务(只有在下载中时有效)
 - (void)suspendTask:(WKDownLoadTask *)task;
 /// 继续任务(暂停状态继续下载，下载失败重新下载，保存失败重新保存，其他状态不处理)

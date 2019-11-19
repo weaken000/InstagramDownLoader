@@ -36,12 +36,12 @@
     
     _descLab = [[UILabel alloc] initWithFrame:CGRectMake(16, 5, CGRectGetMinX(_actionButton.frame) - 26, 20)];
     _descLab.font = [UIFont systemFontOfSize:12];
-    _descLab.textColor = [UIColor blackColor];
+    _descLab.textColor = [UIColor whiteColor];
     [self.contentView addSubview:_descLab];
     
     _stateLab = [[UILabel alloc] initWithFrame:CGRectMake(16, CGRectGetMaxY(_descLab.frame) + 5, CGRectGetMinX(_actionButton.frame) - 26, 20)];
     _stateLab.font = [UIFont systemFontOfSize:12];
-    _stateLab.textColor = [UIColor blackColor];
+    _stateLab.textColor = [UIColor whiteColor];
     [self.contentView addSubview:_stateLab];
     
     _progressLayer = [CAShapeLayer layer];
@@ -56,52 +56,6 @@
     _progressLayer.cornerRadius = 1.5;
     [self.contentView.layer addSublayer:_progressLayer];
 }
-//
-//- (void)setDesc:(NSString *)desc {
-//    _desc = desc;
-//    _descLab.text = desc;
-//}
-//
-//- (void)setProgress:(CGFloat)progress {
-//    _progress = progress;
-//    _progressLayer.strokeEnd = progress;
-//}
-//
-//- (void)setThumUrl:(NSString *)thumUrl {
-//    _thumUrl = thumUrl;
-//}
-//
-//- (void)setStatus:(TaskStatus)status {
-//    _status = status;
-//    if (status == TaskStatusWait) {
-//        [_actionButton setTitle:@"开始下载" forState:UIControlStateNormal];
-//        _stateLab.text = @"等待下载中";
-//    } else if (status == TaskStatusLoading) {
-//        [_actionButton setTitle:@"暂停" forState:UIControlStateNormal];
-//        _stateLab.text = @"下载中";
-//    } else if (status == TaskStatusSuspend) {
-//        [_actionButton setTitle:@"继续下载" forState:UIControlStateNormal];
-//        _stateLab.text = @"暂停中";
-//    } else if (status == TaskStatusFinished) {
-//        [_actionButton setTitle:@"等待保存" forState:UIControlStateNormal];
-//        _stateLab.text = @"等待保存中";
-//    } else if (status == TaskStatusFailure) {
-//        [_actionButton setTitle:@"重新下载" forState:UIControlStateNormal];
-//        _stateLab.text = @"下载失败";
-//    } else if (status == TaskStatusSaveing) {
-//        [_actionButton setTitle:@"保存中" forState:UIControlStateNormal];
-//        _stateLab.text = @"保存中";
-//    } else if (status == TaskStatusSaveFinish) {
-//        [_actionButton setTitle:@"保存完成" forState:UIControlStateNormal];
-//        _stateLab.text = @"任务完成";
-//    } else if (status == TaskStatusCoding) {
-//        [_actionButton setTitle:@"编码中" forState:UIControlStateNormal];
-//        _stateLab.text = @"正在重编码";
-//    } else {
-//        [_actionButton setTitle:@"重新保存" forState:UIControlStateNormal];
-//        _stateLab.text = @"保存失败，点击重新保存";
-//    }
-//}
 
 - (void)configTask:(WKDownLoadTask *)task {
     [self updateByTask:task];

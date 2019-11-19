@@ -12,14 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MissionCell : UITableViewCell
-//
-//@property (nonatomic,   copy) NSString *thumUrl;
-//
-//@property (nonatomic,   copy) NSString *desc;
-//
-//@property (nonatomic, assign) CGFloat progress;
-//
-//@property (nonatomic, assign) TaskStatus status;
+
 - (void)configTask:(WKDownLoadTask *)task;
 
 @end

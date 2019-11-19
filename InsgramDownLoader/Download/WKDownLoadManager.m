@@ -13,24 +13,27 @@
 #import "PhotosTool.h"
 #import "VideoReCoderTool.h"
 
-#define BACKSESSION_IDENTIFIER @"com.wk.backgroundSession"
+#define BACKSESSION_IDENTIFIER @"com.wk.insgramDownloader.backgroundSession"
 
 @interface WKDownLoadManager()<NSURLSessionDownloadDelegate>
+/// 所有任务
+@property (nonatomic, strong) NSMutableArray<WKDownLoadTask *> *allTasks;
 /// 下载中的任务
 @property (nonatomic, strong) NSMutableArray<WKDownLoadTask *> *activeTasks;
-/// 下载完成的任务
+/// 保存完成的任务
 @property (nonatomic, strong) NSMutableArray<WKDownLoadTask *> *compeleteTasks;
-/// 下载失败的任务
+/// 下载、保存失败的任务
 @property (nonatomic, strong) NSMutableArray<WKDownLoadTask *> *errorTasks;
 
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, WKDownLoadTask *> *tasksMap;
 
 @property (nonatomic, assign) NSInteger activeCount;
 
+@property (nonatomic, strong) NSRecursiveLock *lock;
+
 @end
 
 static WKDownLoadManager *_instance;
-pthread_mutex_t mutex;
 
 @implementation WKDownLoadManager
 
@@ -44,194 +47,264 @@ pthread_mutex_t mutex;
 
 - (instancetype)init {
     if (self == [super init]) {
-        NSURLSessionConfiguration *config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKSESSION_IDENTIFIER];
-        config.sessionSendsLaunchEvents = YES;
-        config.discretionary = YES;
-        _session = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:[NSOperationQueue mainQueue]];
         
         _maxConcurrenceCount = 5;
-        _tasksMap = [NSMutableDictionary dictionary];
-        _activeTasks = [NSMutableArray array];
-        _compeleteTasks = [NSMutableArray array];
-        _errorTasks = [NSMutableArray array];
-        pthread_mutex_init(&mutex,NULL);
+        self.lock = [[NSRecursiveLock alloc] init];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterFore) name:UIApplicationWillEnterForegroundNotification object:nil];
+        
+        NSURLSessionConfiguration *config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKSESSION_IDENTIFIER];
+        _session = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:[[NSOperationQueue alloc] init]];
+        
+        dispatch_async(dispatch_get_global_queue(0, DISPATCH_QUEUE_PRIORITY_DEFAULT), ^{
+            [self readAllTask];
+        });
     }
     return self;
 }
 
-- (void)setUrls:(NSArray<NSString *> *)urls {
-    _urls = urls;
-    [self clear];
-    if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-        [self.delegate downloadManagerDidUpdateTask:self];
-    }
-    
-    //创建下载列表
-    [self setupDownloadTasks];
-}
-
-#pragma mark -
-- (void)setupDownloadTasks {
-    for (int i = 0; i < _urls.count; i++) {
-        if ([_urls[i] isKindOfClass:[NSNull class]]) {
-            continue;
+#pragma mark - init
+- (void)readAllTask {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if ([fileManager fileExistsAtPath:WK_TASK_PATH]) {
+        NSArray *dirArray = [fileManager contentsOfDirectoryAtPath:WK_TASK_PATH error:nil];
+        self.allTasks = [NSMutableArray arrayWithCapacity:dirArray.count];
+        for (NSString *str in dirArray) {
+            NSString *subPath = [WK_TASK_PATH stringByAppendingPathComponent:str];
+            WKDownLoadTask *task = [NSKeyedUnarchiver unarchiveObjectWithFile:subPath];
+            [self.allTasks addObject:task];
         }
-        NSString *url = _urls[i];
-        if (self.type == WKDownLoadTypeIns) {
-            //下载ins素材
-            if ([url rangeOfString:@"&dl=1"].location != NSNotFound) {
-                url = [url substringToIndex:url.length-5];
-            }
-            NSURLSessionDownloadTask *task = [_session downloadTaskWithURL:[NSURL URLWithString:url]];
-            WKDownLoadTask *model = [[WKDownLoadTask alloc] init];
-            model.task = task;
-            model.url = url;
-            model.desc = [url containsString:@".jpg?"] ? @"instagram图片" : @"instagram视频";
-            [self wk_addTask:model];
-            if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-                [self.delegate downloadManagerDidUpdateTask:self];
-            }
-        } else {
-            //下载youtube视频
-            __weak typeof(self) weakSelf = self;
-            [self getdownLoaderUrl:url maxRetry:10 complete:^(NSDictionary * _Nullable videoDict, NSString * _Nullable error) {
-                if (error) {
-                    WKDownLoadTask *model = [[WKDownLoadTask alloc] init];
-                    model.error = error;
-                    model.url = url;
-                    model.status = WKTaskStatusLoading;
-                    [self.errorTasks addObject:model];
-                } else {
-                    NSArray *formats = videoDict[@"formats"];
-                    for (int j = 0; j < formats.count; j++) {
-                        NSDictionary *format = formats[j];
-                        NSString *fileSize   = [NSString stringWithFormat:@"%.2fM", [format[@"filesize"] integerValue] / 1024.0 / 1024.0];
-                        NSString *type       = format[@"ext"];//文件类型
-                        NSString *height     = format[@"height"];
-                        NSString *acodec     = [format[@"acodec"] isEqualToString:@"none"]?@"无声":@"有声";
-                        NSString *url        = format[@"url"];
-                        
-                        WKDownLoadTask *task = [[WKDownLoadTask alloc] init];
-                        task.url = url;
-                        task.desc = [NSString stringWithFormat:@"%@ | %@ | %@ | %@", height, type, fileSize, acodec];
-                        task.status = WKTaskStatusWait;
-                        [weakSelf.activeTasks addObject:task];
-                    }
-                }
-                if ([weakSelf.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-                    [weakSelf.delegate downloadManagerDidUpdateTask:weakSelf];
-                }
-            }];
-        }
-    }
-}
-
-#pragma mark - Task Action
-- (void)wk_addTask:(WKDownLoadTask *)task {
-    pthread_mutex_lock(&mutex);
-    if (![self.activeTasks containsObject:task]) {
-        [self.activeTasks addObject:task];
-    }
-    if (![self.tasksMap.allValues containsObject:task]) {
-        [self.tasksMap setObject:task forKey:@(task.task.taskIdentifier)];
-    }
-    if (self.activeCount < self.maxConcurrenceCount) {//未达到临界值，立即下载
-        self.activeCount += 1;
-        task.status = WKTaskStatusLoading;
-        [task.task resume];
     } else {
-        task.status = WKTaskStatusWait;
+        [fileManager createDirectoryAtURL:[NSURL fileURLWithPath:WK_TASK_PATH] withIntermediateDirectories:YES attributes:nil error:nil];
     }
-    if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-        [self.delegate downloadManagerDidUpdateTask:self];
+    if (!_allTasks) {
+        _allTasks = [NSMutableArray array];
     }
-    pthread_mutex_unlock(&mutex);
+    _tasksMap       = [NSMutableDictionary dictionary];
+    _activeTasks    = [NSMutableArray array];
+    _compeleteTasks = [NSMutableArray array];
+    _errorTasks     = [NSMutableArray array];
+    [self filterTasks];
 }
 
-- (void)suspendTask:(WKDownLoadTask *)task {
-    if (task.status == WKTaskStatusLoading) {
-        pthread_mutex_lock(&mutex);
-        self.activeCount -= 1;
-        [task.task suspend];
-        pthread_mutex_unlock(&mutex);
-    }
-}
-
-//继续任务(暂停状态继续下载，下载失败重新下载，保存失败重新保存，其他状态不处理)
-- (void)resumeTask:(WKDownLoadTask *)task {
+- (void)filterTasks {
     
-    //等待开始下载，还没有初始化下载任务
-    if (self.type == WKDownLoadTypeYoutube && task.status == WKTaskStatusWait) {
-        NSURLSessionDownloadTask *downloadTask = [_session downloadTaskWithURL:[NSURL URLWithString:task.url]];
-        task.task = downloadTask;
-        [self wk_addTask:task];
+    for (WKDownLoadTask *task in self.allTasks) {
+        if (task.status == WKTaskStatusFailure || task.status == WKTaskStatusSaveFailure) {//
+            [self.errorTasks addObject:task];
+        } else if (task.status == WKTaskStatusSaveFinish) {
+            [self.compeleteTasks addObject:task];
+        } else {
+            [self.activeTasks addObject:task];
+        }
+    }
+    
+    __weak typeof(self) weakSelf = self;
+    [_session getTasksWithCompletionHandler:^(NSArray<NSURLSessionDataTask *> * _Nonnull dataTasks, NSArray<NSURLSessionUploadTask *> * _Nonnull uploadTasks, NSArray<NSURLSessionDownloadTask *> * _Nonnull downloadTasks) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        for (NSURLSessionDownloadTask *task in downloadTasks) {
+            WKDownLoadTask *loadTask = [strongSelf findTaskByUrl:task.originalRequest.URL.absoluteString];
+            if (!loadTask) {
+                continue;
+            }
+            loadTask.task = task;
+            if (task.state == NSURLSessionTaskStateRunning) {
+                loadTask.status = WKTaskStatusLoading;
+                [strongSelf.tasksMap setObject:loadTask forKey:@(task.taskIdentifier)];
+            } else if (task.state == NSURLSessionTaskStateSuspended) {
+                loadTask.status = WKTaskStatusSuspend;
+                [strongSelf.tasksMap setObject:loadTask forKey:@(task.taskIdentifier)];
+            } else if (task.state == NSURLSessionTaskStateCanceling) {
+                loadTask.error = @"任务被取消";
+                loadTask.status = WKTaskStatusFailure;
+                if (![strongSelf.errorTasks containsObject:loadTask]) {
+                    [strongSelf.errorTasks addObject:loadTask];
+                }
+                if ([strongSelf.activeTasks containsObject:loadTask]) {
+                    [strongSelf.activeTasks removeObject:loadTask];
+                }
+            } else {
+                loadTask.error = @"后台下载失败";
+                loadTask.status = WKTaskStatusFailure;
+                if (![strongSelf.errorTasks containsObject:loadTask]) {
+                    [strongSelf.errorTasks addObject:loadTask];
+                }
+                if ([strongSelf.activeTasks containsObject:loadTask]) {
+                    [strongSelf.activeTasks removeObject:loadTask];
+                }
+            }
+        }
+        
+        [strongSelf toggleDelegateInMainthread];
+    }];
+}
+
+- (WKDownLoadTask * _Nullable)findTaskByUrl:(NSString *)url {
+    for (WKDownLoadTask *task in self.allTasks) {
+        if ([task.url isEqualToString:url]) {
+            return task;
+        }
+    }
+    return nil;
+}
+
+- (void)safe:(void(^)(void))block {
+//    [self.lock lock];
+//    void (^ copy)(void) = [block copy];
+//    copy();
+//    copy = nil;
+//    [self.lock unlock];
+    block();
+}
+
+- (void)toggleDelegateInMainthread {
+    dispatch_async(dispatch_get_main_queue(), ^{
         if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
             [self.delegate downloadManagerDidUpdateTask:self];
         }
-        return;
-    }
+    });
+}
+
+#pragma mark - Task Action
+/// 添加下载任务(创建sessionTask)
+- (void)addTask:(WKDownLoadTask *)task {
+    [self safe:^{
+        if (![self.activeTasks containsObject:task]) {
+            [self.activeTasks addObject:task];
+        }
+        if (self.activeCount < self.maxConcurrenceCount) {//未达到临界值，立即下载
+            self.activeCount += 1;
+            task.task = [self.session downloadTaskWithURL:[NSURL URLWithString:task.url]];
+            [self.tasksMap setObject:task forKey:@(task.task.taskIdentifier)];
+            task.status = WKTaskStatusLoading;
+            [task.task resume];
+        } else {
+            task.status = WKTaskStatusWait;
+        }
+        if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
+            [self.delegate downloadManagerDidUpdateTask:self];
+        }
+    }];
+}
+/// 添加多个下载任务(创建sessionTask)
+- (void)addTasks:(NSArray<WKDownLoadTask *> *)tasks {
+    [self safe:^{
+        for (WKDownLoadTask *task in tasks) {
+            if (![self.activeTasks containsObject:task]) {
+                [self.activeTasks addObject:task];
+            }
+            if (self.activeCount < self.maxConcurrenceCount) {//未达到临界值，立即下载
+                self.activeCount += 1;
+                task.task = [self.session downloadTaskWithURL:[NSURL URLWithString:task.url]];
+                [self.tasksMap setObject:task forKey:@(task.task.taskIdentifier)];
+                task.status = WKTaskStatusLoading;
+                [task.task resume];
+            } else {
+                task.status = WKTaskStatusWait;
+            }
+        }
+        if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
+            [self.delegate downloadManagerDidUpdateTask:self];
+        }
+    }];
     
-    //暂停，继续下载
-    if (task.status == WKTaskStatusSuspend) {
-        pthread_mutex_lock(&mutex);
-        //已经到达阈值，暂停活跃里正在下载的第一个
-        if (self.activeCount == self.maxConcurrenceCount) {
-            for (WKDownLoadTask *activeTask in self.activeTasks) {
-                if (activeTask.status == WKTaskStatusLoading) {
-                    [activeTask.task suspend];
-                    activeTask.status = WKTaskStatusSuspend;
-                    self.activeCount -= 1;
+}
+/// 暂停任务
+- (void)suspendTask:(WKDownLoadTask *)task {
+    [self safe:^{
+        if (task.status == WKTaskStatusLoading) {
+            [task.task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+                [self.tasksMap removeObjectForKey:@(task.task.taskIdentifier)];
+                task.resumeData = resumeData;
+                task.task = nil;
+                self.activeCount -= 1;
+                task.status = WKTaskStatusSuspend;
+            }];
+        }
+    }];
+}
+/// 继续任务(暂停状态继续下载，下载失败重新下载，保存失败重新保存，其他状态不处理)
+- (void)resumeTask:(WKDownLoadTask *)task {
+    [self safe:^{
+        //暂停中，继续下载
+        if (task.status == WKTaskStatusSuspend || task.status == WKTaskStatusWait) {
+            NSURLSessionDownloadTask *downloadTask;
+            if (task.resumeData) {
+                downloadTask = [self.session downloadTaskWithResumeData:task.resumeData];
+                task.resumeData = nil;
+            } else {
+                downloadTask = [self.session downloadTaskWithURL:[NSURL URLWithString:task.url]];
+            }
+            task.task = downloadTask;
+            task.status = WKTaskStatusLoading;
+            [self.tasksMap setObject:task forKey:@(downloadTask.taskIdentifier)];
+            [task.task resume];
+            if (self.activeCount == self.maxConcurrenceCount) {
+                for (WKDownLoadTask *tmp in self.activeTasks) {
+                    if (tmp.status == WKTaskStatusLoading) {
+                        [self suspendTask:tmp];
+                        self.activeCount -= 1;
+                        break;
+                    }
+                }
+            }
+            self.activeCount += 1;
+            return;
+        }
+        
+        //下载失败，重新下载
+        if (task.status == WKTaskStatusFailure) {
+            [self.errorTasks removeObject:task];
+            [self addTask:task];
+            if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
+                [self.delegate downloadManagerDidUpdateTask:self];
+            }
+            return;
+        }
+        
+        //保存失败，重新保存
+        if (task.status == WKTaskStatusSaveFailure) {
+            [self.errorTasks removeObject:task];
+            [self.activeTasks addObject:task];
+            if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
+                [self.delegate downloadManagerDidUpdateTask:self];
+            }
+            
+            [self saveDataForTask:task];
+        }
+    }];
+}
+
+- (void)cancelTask:(WKDownLoadTask *)task {
+    [self safe:^{
+        if (task.status == WKTaskStatusLoading) {
+            [task clear];
+            task.error = @"下载任务被取消";
+            task.status = WKTaskStatusFailure;
+            self.activeCount -= 1;
+            [self.errorTasks addObject:task];
+            [self.activeTasks removeObject:task];
+            if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
+                [self.delegate downloadManagerDidUpdateTask:self];
+            }
+        }
+    }];
+}
+
+- (void)startNextTask {
+    [self safe:^{
+        if (self.activeTasks.count > 0) {
+            for (WKDownLoadTask *task in self.activeTasks) {
+                if (task.status == WKTaskStatusWait || task.status == WKTaskStatusSuspend) {
+                    [self addTask:task];
                     break;
                 }
             }
         }
-        self.activeCount = MIN(self.maxConcurrenceCount, (self.activeCount + 1));
-        task.status = WKTaskStatusLoading;
-        [task.task resume];
-        pthread_mutex_unlock(&mutex);
-        return;
-    }
-    
-    //下载失败，重新下载
-    if (task.status == WKTaskStatusFailure) {
-        NSURLSessionDownloadTask *downloadTask = [_session downloadTaskWithURL:[NSURL URLWithString:task.url]];
-        task.task = downloadTask;
-        [self.errorTasks removeObject:task];
-        [self wk_addTask:task];
-        if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-            [self.delegate downloadManagerDidUpdateTask:self];
-        }
-        return;
-    }
-    
-    //保存失败，重新保存
-    if (task.status == WKTaskStatusSaveFailure) {
-        [self.errorTasks removeObject:task];
-        [self.activeTasks addObject:task];
-        if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-            [self.delegate downloadManagerDidUpdateTask:self];
-        }
-        
-        task.status = WKTaskStatusSaveing;
-        [self saveDataForTask:task];
-        return;
-    }
-    
-}
-
-- (void)cancelTask:(WKDownLoadTask *)task {
-    
+    }];
 }
 
 - (void)clear {
-    //清除历史下载记录
-    for (WKDownLoadTask *task in self.activeTasks) {
-        [task clear];
-    }
-    [self.activeTasks removeAllObjects];
-    
     for (WKDownLoadTask *task in self.compeleteTasks) {
         [task clear];
     }
@@ -241,27 +314,31 @@ pthread_mutex_t mutex;
         [task clear];
     }
     [self.errorTasks removeAllObjects];
-    
-    [self.tasksMap removeAllObjects];
-    self.activeCount = 0;
+    [self toggleDelegateInMainthread];
 }
 
 #pragma mark - NSURLSessionDownloadDelegate
-
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(nullable NSError *)error {
-    self.activeCount -= 1;
     if (error) {
         WKDownLoadTask *model = [self.tasksMap objectForKey:@(task.taskIdentifier)];
-        if (!model) {
+        if (!model || [_errorTasks containsObject:model]) {
             return;
         }
+        
+        self.activeCount -= 1;
         model.error = error.localizedRecoverySuggestion;
         model.status = WKTaskStatusFailure;
         [self.activeTasks removeObject:model];
         [self.errorTasks addObject:model];
-        if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-            [self.delegate downloadManagerDidUpdateTask:self];
+        [self startNextTask];
+        [self toggleDelegateInMainthread];
+    } else {
+        NSLog(@"%@", task);
+        WKDownLoadTask *model = [self.tasksMap objectForKey:@(task.taskIdentifier)];
+        if (!model) {
+            return;
         }
+        model.progress = 1;
     }
 }
 
@@ -273,39 +350,38 @@ pthread_mutex_t mutex;
 
 // 下载完成
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
-    self.activeCount -= 1;
     WKDownLoadTask *model = [self.tasksMap objectForKey:@(downloadTask.taskIdentifier)];
     if (!model) {
         return;
     }
-    model.status = WKTaskStatusSaveing;
-    //当文件是视频格式时，需要从tmp文件夹移到其他的沙盒文件夹
-    NSError *error;
-    if (self.type == WKDownLoadTypeYoutube || ![model.url containsString:@"jpg?"]) {
-        NSString *cache = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-        NSString *dir = [cache stringByAppendingPathComponent:@"com.cache.lk"];
-        if (![[NSFileManager defaultManager] isExecutableFileAtPath:dir]) {
-            [[NSFileManager defaultManager] createDirectoryAtURL:[NSURL fileURLWithPath:dir] withIntermediateDirectories:YES attributes:nil error:nil];
-        }
-        model.filePath = [dir stringByAppendingPathComponent:downloadTask.response.suggestedFilename];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:model.filePath]) {
-            [[NSFileManager defaultManager] removeItemAtPath:model.filePath error:nil];
-        }
-
-        [[NSFileManager defaultManager] moveItemAtURL:location toURL:[NSURL fileURLWithPath:model.filePath] error:&error];
-    } else {
-        model.filePath = location.path;
-    }
+    self.activeCount -= 1;
+    [self startNextTask];
     
+    model.filePath = location.path;
+    model.status = WKTaskStatusFinished;
+    
+    //从tmp文件夹移到cache的沙盒文件夹
+    NSError *error;
+    NSString *cache = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *dir = [cache stringByAppendingPathComponent:@"com.cache.lk"];
+    if (![[NSFileManager defaultManager] isExecutableFileAtPath:dir]) {
+        [[NSFileManager defaultManager] createDirectoryAtURL:[NSURL fileURLWithPath:dir] withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    NSString *cachePath = [dir stringByAppendingPathComponent:downloadTask.response.suggestedFilename];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
+        [[NSFileManager defaultManager] removeItemAtPath:cachePath error:nil];
+    }
+
+    [[NSFileManager defaultManager] moveItemAtURL:location toURL:[NSURL fileURLWithPath:cachePath] error:&error];
+   
     if (error) {
         model.error = error.localizedRecoverySuggestion;
         model.status = WKTaskStatusSaveFailure;
         [self.activeTasks removeObject:model];
         [self.errorTasks addObject:model];
-        if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-            [self.delegate downloadManagerDidUpdateTask:self];
-        }
+        [self toggleDelegateInMainthread];
     } else {
+        model.filePath = cachePath;
         [self saveDataForTask:model];
     }
 }
@@ -320,90 +396,11 @@ pthread_mutex_t mutex;
 }
 
 #pragma mark -
-- (void)getdownLoaderUrl:(NSString *)yotubeUrl maxRetry:(NSUInteger)maxRetry complete:(void (^) (NSDictionary * _Nullable videoDict, NSString * _Nullable error))complete {
-        
-    NSURLComponents *youtubeCpm = [NSURLComponents componentsWithString:yotubeUrl];
-    NSString *youtubeWatchKey;
-    if ([youtubeCpm.host isEqualToString:@"youtu.be"]) {
-        youtubeWatchKey = [youtubeCpm.path substringFromIndex:1];
-    } else {
-        if (!youtubeCpm.queryItems.count) {
-            complete(nil, @"获取不到下载链接的key");
-            return;
-        }
-        youtubeWatchKey = youtubeCpm.queryItems.firstObject.value;
-    }
-    [ToastView showLoading];
-    NSString *referer = [NSString stringWithFormat:@"ttps://keepvid.pro/youtube/%@", youtubeWatchKey];
-    NSDictionary *httpHeaders = @{@"Content-Type": @"application/json",
-                                  @"Referer": referer,
-                                  @"Host": @"v2api.keepvid.pro",
-                                  @"Origin": @"https://keepvid.pro"
-    };
-    
-    NSURLSession *session = [NSURLSession sharedSession];
-    
-    NSMutableURLRequest *jobReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://v2api.keepvid.pro/v1/job"]];
-    jobReq.HTTPMethod = @"POST";
-    [jobReq setAllHTTPHeaderFields:httpHeaders];
-    NSDictionary *jobParam = @{@"params": @{@"video_url": yotubeUrl},
-                               @"type": @"crawler"
-    };
-    jobReq.HTTPBody = [NSJSONSerialization dataWithJSONObject:jobParam options:NSJSONWritingFragmentsAllowed error:nil];
-    
-    NSURLSessionDataTask *jobTask = [session dataTaskWithRequest:jobReq completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (error) {
-                complete(nil, @"获取jobId失败");
-                return;
-            }
-            //获取到了jobid，获取正确的下载视频链接
-            id res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
-            NSString *jobId = [[res objectForKey:@"data"] objectForKey:@"job_id"];
-            NSString *type  = [[res objectForKey:@"data"] objectForKey:@"type"];
-
-            if (jobId) {
-                NSMutableURLRequest *dataReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://v2api.keepvid.pro/v1/check?type=%@&job_id=%@", type, jobId]]];
-                dataReq.HTTPMethod = @"GET";
-                [dataReq setAllHTTPHeaderFields:httpHeaders];
-                NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:dataReq completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        if (error) {
-                            complete(nil, @"获取视频下载列表失败");
-                            return;
-                        }
-                        [ToastView hiddenLoading];
-                        id res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
-                        NSLog(@"%@", res);
-                        NSDictionary *data = [res objectForKey:@"data"];
-                        if (!data) {
-                            complete(nil, @"获取data失败");
-                            return;
-                        }
-                        NSArray *formats = data[@"formats"];
-                        if (!formats) {
-                            if (maxRetry == 0) {
-                                complete(nil, @"连续10次获取不到视频链接");
-                            } else {
-                                
-                            }
-                            [self getdownLoaderUrl:yotubeUrl maxRetry:maxRetry-1 complete:complete];
-                        } else {
-                            complete(data, nil);
-                        }
-                    });
-                }];
-                [dataTask resume];
-            }
-        });
-    }];
-    [jobTask resume];
-}
-
 - (void)saveDataForTask:(WKDownLoadTask *)task {
     __weak typeof(self) weakSelf = self;
     __weak typeof(task) weakTask = task;
-    if (self.type == WKDownLoadTypeYoutube) {//保存youtube
+    task.status = WKTaskStatusSaveing;
+    if (task.mediaType == WKMediaTypeYoutubeVideo) {//保存youtube
         [[PhotosTool share] saveYoutube:[NSURL fileURLWithPath:task.filePath] compeled:^(NSString * _Nullable error) {
             [weakSelf.activeTasks removeObject:weakTask];
             if (error) {
@@ -414,12 +411,10 @@ pthread_mutex_t mutex;
                 weakTask.status = WKTaskStatusSaveFinish;
                 [weakSelf.compeleteTasks addObject:weakTask];
             }
-            if ([weakSelf.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-                [weakSelf.delegate downloadManagerDidUpdateTask:weakSelf];
-            }
+            [weakSelf toggleDelegateInMainthread];
         }];
     } else {
-        if ([task.url containsString:@"jpg?"]) {//保存图片
+        if (task.mediaType == WKMediaTypeInstagramImage) {//保存图片
             NSData *data = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:task.filePath]];
             UIImage *image = [UIImage imageWithData:data];
             [[PhotosTool share] saveImage:image compeled:^(NSString * _Nullable error) {
@@ -434,9 +429,7 @@ pthread_mutex_t mutex;
                         [weakSelf.activeTasks removeObject:weakTask];
                         [weakSelf.compeleteTasks addObject:weakTask];
                     }
-                    if ([weakSelf.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-                        [weakSelf.delegate downloadManagerDidUpdateTask:weakSelf];
-                    }
+                    [weakSelf toggleDelegateInMainthread];
                 });
             }];
         } else {//保存视频
@@ -461,9 +454,7 @@ pthread_mutex_t mutex;
                             [weakSelf.activeTasks removeObject:weakTask];
                             [weakSelf.compeleteTasks addObject:weakTask];
                         }
-                        if ([weakSelf.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-                            [weakSelf.delegate downloadManagerDidUpdateTask:weakSelf];
-                        }
+                        [weakSelf toggleDelegateInMainthread];
                     }];
                 }];
             } else {
@@ -478,9 +469,7 @@ pthread_mutex_t mutex;
                         [weakSelf.activeTasks removeObject:weakTask];
                         [weakSelf.compeleteTasks addObject:weakTask];
                     }
-                    if ([weakSelf.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-                        [weakSelf.delegate downloadManagerDidUpdateTask:weakSelf];
-                    }
+                    [weakSelf toggleDelegateInMainthread];
                 }];
             }
         }
@@ -488,9 +477,7 @@ pthread_mutex_t mutex;
 }
 
 - (void)applicationWillEnterFore {
-    if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
-        [self.delegate downloadManagerDidUpdateTask:self];
-    }
+    [self toggleDelegateInMainthread];
 }
 
 @end

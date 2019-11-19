@@ -1,26 +1,25 @@
 //
-//  ImageLoadViewController.m
+//  InstagramViewController.m
 //  InsgramDownLoader
 //
 //  Created by mac on 2019/10/17.
 //  Copyright © 2019 leke. All rights reserved.
 //
 
-#import "ImageLoadViewController.h"
-#import "DownloadProgressViewController.h"
-#import "YoutubeViewController.h"
+#import "InstagramViewController.h"
 
 #import <WebKit/WebKit.h>
 #import "ToastView.h"
 #import "PhotosTool.h"
+#import "WKUrlToModelTransform.h"
 
-@interface ImageLoadViewController ()<WKNavigationDelegate>
+@interface InstagramViewController ()<WKNavigationDelegate>
 
 @property (nonatomic, strong) WKWebView *webView;
 
 @end
 
-@implementation ImageLoadViewController
+@implementation InstagramViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -102,18 +101,13 @@
     [left setTitle:isOpen?@"关闭code":@"开启code" forState:UIControlStateNormal];
     [left addTarget:self action:@selector(click_openCode:) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:left];
-    
-    UIButton *jumpToYoutubeButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [jumpToYoutubeButton setTitle:@"跳转Youtube" forState:UIControlStateNormal];
-    [jumpToYoutubeButton addTarget:self action:@selector(click_openYoutube) forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *jumpToYoutubeItem = [[UIBarButtonItem alloc] initWithCustomView:jumpToYoutubeButton];
 
-    self.navigationItem.leftBarButtonItems = @[jumpToYoutubeItem, leftItem];
+    self.navigationItem.leftBarButtonItems = @[leftItem];
 }
 
 - (void)setupInstance {
     
-    NSString *cache=[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *cache = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSString *dir = [cache stringByAppendingPathComponent:@"com.cache.lk"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:dir]) {
         [[NSFileManager defaultManager] removeItemAtPath:dir error:nil];
@@ -131,10 +125,10 @@
 - (void)click_pushToImage {
     [ToastView showLoading];
     [self.webView evaluateJavaScript:@"getImages()" completionHandler:^(id _Nullable value, NSError * _Nullable error) {
-        [ToastView hiddenLoading];
-        DownloadProgressViewController *next = [[DownloadProgressViewController alloc] init];
-        next.urls = value;
-        [self.navigationController pushViewController:next animated:YES];
+        [WKUrlToModelTransform transformInstagramUrls:value complete:^{
+            [ToastView hiddenLoading];
+            [self.tabBarController setSelectedIndex:2];
+        }];
     }];
 }
 
@@ -143,12 +137,6 @@
     isOpen = !isOpen;
     [[NSUserDefaults standardUserDefaults] setBool:isOpen forKey:@"com.wk.open"];
     [sender setTitle:isOpen?@"关闭code":@"开启code" forState:UIControlStateNormal];
-}
-
-- (void)click_openYoutube {
-    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    UIViewController *vc = [storyBoard instantiateViewControllerWithIdentifier:@"youtube"];
-    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)fillInputFiled {

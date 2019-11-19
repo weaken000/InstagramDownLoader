@@ -8,17 +8,20 @@
 
 #import "YoutubeViewController.h"
 #import "YoutubeFormatCell.h"
+#import "WKUrlToModelTransform.h"
 #import "WKDownLoadManager.h"
+#import "ToastView.h"
 
 @interface YoutubeViewController ()
 <UITableViewDelegate,
 UITableViewDataSource,
-YoutubeFormatCellDelegate,
-WKDownLoadManagerDelegate>
+YoutubeFormatCellDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *urlTF;
 @property (weak, nonatomic) IBOutlet UIButton    *downloadButton;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+
+@property (nonatomic, strong) NSArray<WKDownLoadTask *> *tasks;
 
 @end
 
@@ -31,85 +34,50 @@ WKDownLoadManagerDelegate>
     _tableView.dataSource = self;
     _tableView.tableFooterView = [UIView new];
     _tableView.rowHeight = 50;
-    [_tableView registerClass:[YoutubeFormatCell class] forCellReuseIdentifier:@"activeCell"];
-    [_tableView registerClass:[YoutubeFormatCell class] forCellReuseIdentifier:@"completeCell"];
-    [_tableView registerClass:[YoutubeFormatCell class] forCellReuseIdentifier:@"errorCell"];
+    [_tableView registerClass:[YoutubeFormatCell class] forCellReuseIdentifier:@"cell"];
     _tableView.separatorColor = [UIColor whiteColor];
     [_downloadButton addTarget:self action:@selector(download) forControlEvents:UIControlEventTouchUpInside];
-    
-    [WKDownLoadManager share].type = WKDownLoadTypeYoutube;
-    [WKDownLoadManager share].delegate = self;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     NSString *string = [UIPasteboard generalPasteboard].string;
-    if (string && [string hasPrefix:@"https://you"]) {
+    if (string && [string hasPrefix:@"https://you"] && ![string isEqualToString:_urlTF.text]) {
         _urlTF.text = string;
     } else {
         _urlTF.text = @"";
-        [_urlTF becomeFirstResponder];
     }
 }
-
 
 #pragma mark - request
 - (void)download {
     [_urlTF resignFirstResponder];
-    [WKDownLoadManager share].urls = @[_urlTF.text];
+    [ToastView showLoading];
+    [WKUrlToModelTransform transformYoutubeUrl:_urlTF.text complete:^(NSArray<WKDownLoadTask *> * _Nullable list, NSString * _Nullable error) {
+        if (error) {
+            [ToastView showMessage:error];
+        } else {
+            [ToastView hiddenLoading];
+            self.tasks = list;
+            [self.tableView reloadData];
+        }
+    }];
 }
 
 #pragma mark - UITableViewDataSource UITableViewDelegate
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 3;
-}
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (section == 0) {
-        return [WKDownLoadManager share].activeTasks.count;
-    }
-    if (section == 1) {
-        return [WKDownLoadManager share].compeleteTasks.count;
-    }
-    return [WKDownLoadManager share].errorTasks.count;
+    return self.tasks.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    YoutubeFormatCell *cell;
-    WKDownLoadManager *manager = [WKDownLoadManager share];
-    if (indexPath.section == 0 && manager.activeTasks.count > 0) {
-        cell = [tableView dequeueReusableCellWithIdentifier:@"activeCell"];
-        [cell configTask:manager.activeTasks[indexPath.row]];
-    }
-    if (indexPath.section == 1 && manager.compeleteTasks.count > 0) {
-        cell = [tableView dequeueReusableCellWithIdentifier:@"completeCell"];
-        [cell configTask:manager.compeleteTasks[indexPath.row]];
-    }
-    if (indexPath.section == 2 && manager.errorTasks.count > 0) {
-        cell = [tableView dequeueReusableCellWithIdentifier:@"errorCell"];
-        [cell configTask:manager.errorTasks[indexPath.row]];
-    }
+    YoutubeFormatCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+    [cell configTask:self.tasks[indexPath.row]];
     cell.delegate = self;
     return cell;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (section == 0) {
-        return @"下载中";
-    }
-    if (section == 1) {
-        return @"已完成";
-    }
-    return @"失败";
-}
-
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     [_urlTF resignFirstResponder];
-}
-
-#pragma mark - WKDownLoadManagerDelegate
-- (void)downloadManagerDidUpdateTask:(WKDownLoadManager *)manager {
-    [self.tableView reloadData];
 }
 
 #pragma mark - YoutubeFormatCellDelegate
@@ -118,15 +86,8 @@ WKDownLoadManagerDelegate>
     if (!indexPath) {
         return;
     }
-    WKDownLoadManager *manager = [WKDownLoadManager share];
-    if (indexPath.section == 0) {
-        [manager resumeTask:manager.activeTasks[indexPath.row]];
-        return;
-    }
-    if (indexPath.section == 2) {
-        [manager resumeTask:manager.errorTasks[indexPath.row]];
-        return;
-    }
+    [[WKDownLoadManager share] addTask:self.tasks[indexPath.row]];
+    [self.tabBarController setSelectedIndex:2];
 }
 
 

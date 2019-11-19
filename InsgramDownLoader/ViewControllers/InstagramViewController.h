@@ -1,5 +1,5 @@
 //
-//  ImageLoadViewController.h
+//  InstagramViewController.h
 //  InsgramDownLoader
 //
 //  Created by mac on 2019/10/17.
@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ImageLoadViewController : UIViewController
+@interface InstagramViewController : UIViewController
 
 @end
 
