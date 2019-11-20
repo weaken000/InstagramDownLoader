@@ -11,6 +11,7 @@
 #import "WKUrlToModelTransform.h"
 #import "WKDownLoadManager.h"
 #import "ToastView.h"
+#import "ColorUtils.h"
 
 @interface YoutubeViewController ()
 <UITableViewDelegate,
@@ -30,12 +31,17 @@ YoutubeFormatCellDelegate>
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    self.view.backgroundColor = [ColorUtils whiteColor];
+    
+    _urlTF.layer.borderColor = [ColorUtils blackColor].CGColor;
+    _urlTF.backgroundColor = [ColorUtils whiteColor];
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.tableFooterView = [UIView new];
     _tableView.rowHeight = 50;
+    _tableView.backgroundColor = [ColorUtils whiteColor];
     [_tableView registerClass:[YoutubeFormatCell class] forCellReuseIdentifier:@"cell"];
-    _tableView.separatorColor = [UIColor whiteColor];
+    _tableView.separatorColor = [ColorUtils blackColor];
     [_downloadButton addTarget:self action:@selector(download) forControlEvents:UIControlEventTouchUpInside];
 }
 
@@ -44,8 +50,6 @@ YoutubeFormatCellDelegate>
     NSString *string = [UIPasteboard generalPasteboard].string;
     if (string && [string hasPrefix:@"https://you"] && ![string isEqualToString:_urlTF.text]) {
         _urlTF.text = string;
-    } else {
-        _urlTF.text = @"";
     }
 }
 

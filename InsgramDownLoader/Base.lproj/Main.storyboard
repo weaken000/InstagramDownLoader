@@ -12,7 +12,7 @@
         <scene sceneID="hK4-7l-dal">
             <objects>
                 <navigationController id="5uz-ck-mhT" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Instagram" id="tIA-1g-tA6"/>
+                    <tabBarItem key="tabBarItem" title="Instagram" image="instagram" id="tIA-1g-tA6"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="15n-RH-mgJ">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -29,7 +29,7 @@
         <scene sceneID="9HU-Uh-YOX">
             <objects>
                 <navigationController id="cR4-Qh-c1Y" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Youtube" id="qzq-9z-oIY"/>
+                    <tabBarItem key="tabBarItem" title="Youtube" image="youtube" id="qzq-9z-oIY"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="A52-Ia-vek">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -50,7 +50,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="请输入网址" textAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="qJc-p8-5Lc">
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="请输入Youtube视频链接" textAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="qJc-p8-5Lc">
                                 <rect key="frame" x="50" y="138" width="314" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="RIb-cH-xNs"/>
@@ -107,6 +107,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="boolean" keyPath="keyPath" value="YES"/>
+                        </userDefinedRuntimeAttributes>
                     </tabBar>
                     <connections>
                         <segue destination="5uz-ck-mhT" kind="relationship" relationship="viewControllers" id="Zye-H7-h6x"/>
@@ -138,7 +141,7 @@
         <scene sceneID="Z1X-ib-1AQ">
             <objects>
                 <navigationController id="DUM-cN-jkB" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="loading" id="8iT-ag-qQk"/>
+                    <tabBarItem key="tabBarItem" title="loading" image="download" id="8iT-ag-qQk"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="dUE-RX-UP8">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -168,4 +171,9 @@
             <point key="canvasLocation" x="-1288" y="690"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="download" width="30" height="30"/>
+        <image name="instagram" width="30" height="30"/>
+        <image name="youtube" width="30" height="30"/>
+    </resources>
 </document>

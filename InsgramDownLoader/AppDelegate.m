@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import "WKDownLoadManager.h"
+#import "ColorUtils.h"
 
 @interface AppDelegate ()
 
@@ -18,6 +19,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     (void)[WKDownLoadManager share];
+    [[UITabBar appearance] setTintColor:[ColorUtils blackColor]];
     return YES;
 }
 
@@ -27,6 +29,7 @@
         [WKDownLoadManager share].completionHandler = completionHandler;
     }
 }
+
 
 
 @end

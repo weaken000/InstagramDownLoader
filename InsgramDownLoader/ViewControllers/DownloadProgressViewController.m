@@ -9,11 +9,13 @@
 #import "DownloadProgressViewController.h"
 #import "WKDownLoadManager.h"
 #import "MissionCell.h"
+#import "ColorUtils.h"
 
 @interface DownloadProgressViewController ()
 <UITableViewDelegate,
 UITableViewDataSource,
-WKDownLoadManagerDelegate
+WKDownLoadManagerDelegate,
+MissionCellDelegate
 >
 
 @property (nonatomic, strong) UITableView *tableView;
@@ -33,6 +35,7 @@ WKDownLoadManagerDelegate
     [_tableView registerClass:[MissionCell class] forCellReuseIdentifier:@"errorCell"];
     _tableView.delegate = self;
     _tableView.dataSource = self;
+    _tableView.backgroundColor = [ColorUtils whiteColor];
     [self.view addSubview:_tableView];
     
     [WKDownLoadManager share].delegate = self;
@@ -40,6 +43,7 @@ WKDownLoadManagerDelegate
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
     [button setTitle:@"清空已下载" forState:UIControlStateNormal];
     [button addTarget:self action:@selector(click_clear) forControlEvents:UIControlEventTouchUpInside];
+    [button setTitleColor:[ColorUtils blackColor] forState:UIControlStateNormal];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
 }
 
@@ -87,7 +91,10 @@ WKDownLoadManagerDelegate
         cell = [tableView dequeueReusableCellWithIdentifier:@"errorCell"];
         [cell configTask:manager.errorTasks[indexPath.row]];
     }
-//    cell.delegate = self;
+    cell.delegate = self;
+    if (!cell) {
+        cell = [[MissionCell alloc] init];
+    }
     return cell;
 }
 
@@ -101,6 +108,33 @@ WKDownLoadManagerDelegate
     return @"失败";
 }
 
+#pragma mark - MissionCellDelegate
+- (void)missionCellDidClickAction:(MissionCell *)cell {
+    NSIndexPath *indexPath = [_tableView indexPathForCell:cell];
+    if (!indexPath) return;
+    if (indexPath.section == 0) {
+        WKDownLoadTask *task = [WKDownLoadManager share].activeTasks[indexPath.row];
+        if (task.status == WKTaskStatusLoading) {
+            [[WKDownLoadManager share] suspendTask:task];
+            return;
+        }
+    }
+    
+    WKDownLoadTask *t;
+    if (indexPath.section == 0) {
+        t = [WKDownLoadManager share].activeTasks[indexPath.row];
+    } else if (indexPath.section == 1) {
+        t = [WKDownLoadManager share].compeleteTasks[indexPath.row];
+    } else {
+        t = [WKDownLoadManager share].errorTasks[indexPath.row];
+    }
+    [[WKDownLoadManager share] resumeTask:t];
+}
 
+- (void)missionCellDidClickCancel:(MissionCell *)cell {
+    NSIndexPath *indexPath = [_tableView indexPathForCell:cell];
+    if (!indexPath) return;
+    [[WKDownLoadManager share] cancelTask:[WKDownLoadManager share].activeTasks[indexPath.row]];
+}
 
 @end

@@ -99,6 +99,18 @@ static WKDownLoadManager *_instance;
         }
     }
     
+    /// 有可能在保存过程中应用奔溃，开启后重新下载
+    for (WKDownLoadTask *task in self.errorTasks) {
+        if (task.status == WKTaskStatusSaveFailure) {
+            [self saveDataForTask:task];
+        }
+    }
+    for (WKDownLoadTask *task in self.activeTasks) {
+        if (task.status == WKTaskStatusFinished || task.status == WKTaskStatusSaveing) {
+            [self saveDataForTask:task];
+        }
+    }
+    
     __weak typeof(self) weakSelf = self;
     [_session getTasksWithCompletionHandler:^(NSArray<NSURLSessionDataTask *> * _Nonnull dataTasks, NSArray<NSURLSessionUploadTask *> * _Nonnull uploadTasks, NSArray<NSURLSessionDownloadTask *> * _Nonnull downloadTasks) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -149,12 +161,11 @@ static WKDownLoadManager *_instance;
 }
 
 - (void)safe:(void(^)(void))block {
-//    [self.lock lock];
-//    void (^ copy)(void) = [block copy];
-//    copy();
-//    copy = nil;
-//    [self.lock unlock];
-    block();
+    [self.lock lock];
+    void (^ copy)(void) = [block copy];
+    copy();
+    copy = nil;
+    [self.lock unlock];
 }
 
 - (void)toggleDelegateInMainthread {
@@ -168,6 +179,7 @@ static WKDownLoadManager *_instance;
 #pragma mark - Task Action
 /// 添加下载任务(创建sessionTask)
 - (void)addTask:(WKDownLoadTask *)task {
+    if (!task) return;
     [self safe:^{
         if (![self.activeTasks containsObject:task]) {
             [self.activeTasks addObject:task];
@@ -211,6 +223,8 @@ static WKDownLoadManager *_instance;
 }
 /// 暂停任务
 - (void)suspendTask:(WKDownLoadTask *)task {
+    if (!task) return;
+
     [self safe:^{
         if (task.status == WKTaskStatusLoading) {
             [task.task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
@@ -225,6 +239,8 @@ static WKDownLoadManager *_instance;
 }
 /// 继续任务(暂停状态继续下载，下载失败重新下载，保存失败重新保存，其他状态不处理)
 - (void)resumeTask:(WKDownLoadTask *)task {
+    if (!task) return;
+    
     [self safe:^{
         //暂停中，继续下载
         if (task.status == WKTaskStatusSuspend || task.status == WKTaskStatusWait) {
@@ -254,6 +270,8 @@ static WKDownLoadManager *_instance;
         
         //下载失败，重新下载
         if (task.status == WKTaskStatusFailure) {
+            task.error = nil;
+            task.progress = 0;
             [self.errorTasks removeObject:task];
             [self addTask:task];
             if ([self.delegate respondsToSelector:@selector(downloadManagerDidUpdateTask:)]) {
@@ -272,10 +290,13 @@ static WKDownLoadManager *_instance;
             
             [self saveDataForTask:task];
         }
+        
     }];
 }
 
 - (void)cancelTask:(WKDownLoadTask *)task {
+    if (!task) return;
+
     [self safe:^{
         if (task.status == WKTaskStatusLoading) {
             [task clear];
@@ -308,11 +329,13 @@ static WKDownLoadManager *_instance;
     for (WKDownLoadTask *task in self.compeleteTasks) {
         [task clear];
     }
+    [self.allTasks removeObjectsInArray:self.compeleteTasks];
     [self.compeleteTasks removeAllObjects];
     
     for (WKDownLoadTask *task in self.errorTasks) {
         [task clear];
     }
+    [self.allTasks removeObjectsInArray:self.errorTasks];
     [self.errorTasks removeAllObjects];
     [self toggleDelegateInMainthread];
 }
@@ -333,12 +356,11 @@ static WKDownLoadManager *_instance;
         [self startNextTask];
         [self toggleDelegateInMainthread];
     } else {
-        NSLog(@"%@", task);
         WKDownLoadTask *model = [self.tasksMap objectForKey:@(task.taskIdentifier)];
         if (!model) {
             return;
         }
-        model.progress = 1;
+        
     }
 }
 

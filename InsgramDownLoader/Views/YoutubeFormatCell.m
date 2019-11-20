@@ -7,6 +7,7 @@
 //
 
 #import "YoutubeFormatCell.h"
+#import "ColorUtils.h"
 
 @implementation YoutubeFormatCell {
     UILabel  *_formatLabel;
@@ -21,19 +22,21 @@
         
         _actionButton = [[UIButton alloc] initWithFrame:CGRectMake(size.width-80, 10, 70, 30)];
         _actionButton.layer.cornerRadius = 5;
-        _actionButton.layer.borderColor = [UIColor greenColor].CGColor;
+        _actionButton.layer.borderColor = [ColorUtils mainColor].CGColor;
         _actionButton.layer.borderWidth = 1.0;
         _actionButton.titleLabel.font = [UIFont systemFontOfSize:12.0];
-        [_actionButton setTitleColor:[UIColor greenColor] forState:UIControlStateNormal];
+        [_actionButton setTitleColor:[ColorUtils mainColor] forState:UIControlStateNormal];
         [_actionButton setTitle:@"下载" forState:UIControlStateNormal];
         [_actionButton addTarget:self action:@selector(click_download) forControlEvents:UIControlEventTouchUpInside];
         [self.contentView addSubview:_actionButton];
         
         _formatLabel = [[UILabel alloc] init];
         _formatLabel.font = [UIFont systemFontOfSize:14];
-        _formatLabel.textColor = [UIColor whiteColor];
+        _formatLabel.textColor = [ColorUtils blackColor];
         [self.contentView addSubview:_formatLabel];
         _formatLabel.frame = CGRectMake(16, 0, size.width - 100, 50);
+        
+        self.backgroundColor = [ColorUtils whiteColor];
     }
     return self;
 }

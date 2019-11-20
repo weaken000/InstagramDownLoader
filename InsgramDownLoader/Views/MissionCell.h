@@ -10,8 +10,19 @@
 #import "WKDownLoadTask.h"
 
 NS_ASSUME_NONNULL_BEGIN
+@class MissionCell;
+
+@protocol MissionCellDelegate <NSObject>
+
+@optional
+- (void)missionCellDidClickCancel:(MissionCell *)cell;
+- (void)missionCellDidClickAction:(MissionCell *)cell;
+
+@end
 
 @interface MissionCell : UITableViewCell
+
+@property (nonatomic, weak) id<MissionCellDelegate> delegate;
 
 - (void)configTask:(WKDownLoadTask *)task;
 

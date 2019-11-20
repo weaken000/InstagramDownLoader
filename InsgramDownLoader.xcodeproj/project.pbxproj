@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		04116DC52383ED0300D8BA48 /* WKUrlToModelTransform.m in Sources */ = {isa = PBXBuildFile; fileRef = 04116DC42383ED0300D8BA48 /* WKUrlToModelTransform.m */; };
+		04116DC8238525FB00D8BA48 /* ColorUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 04116DC7238525FA00D8BA48 /* ColorUtils.m */; };
 		0437E80C2368044F00C8B885 /* VideoReCoderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 0437E80B2368044F00C8B885 /* VideoReCoderTool.m */; };
 		045A28BE2373BF750012EB28 /* WKDownLoadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A28BD2373BF750012EB28 /* WKDownLoadManager.m */; };
 		045A28C12373BFA90012EB28 /* WKDownLoadTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A28C02373BFA90012EB28 /* WKDownLoadTask.m */; };
@@ -47,6 +48,8 @@
 /* Begin PBXFileReference section */
 		04116DC32383ED0300D8BA48 /* WKUrlToModelTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKUrlToModelTransform.h; sourceTree = "<group>"; };
 		04116DC42383ED0300D8BA48 /* WKUrlToModelTransform.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKUrlToModelTransform.m; sourceTree = "<group>"; };
+		04116DC6238525FA00D8BA48 /* ColorUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorUtils.h; sourceTree = "<group>"; };
+		04116DC7238525FA00D8BA48 /* ColorUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ColorUtils.m; sourceTree = "<group>"; };
 		0437E80A2368044F00C8B885 /* VideoReCoderTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoReCoderTool.h; sourceTree = "<group>"; };
 		0437E80B2368044F00C8B885 /* VideoReCoderTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoReCoderTool.m; sourceTree = "<group>"; };
 		045A28BC2373BF750012EB28 /* WKDownLoadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKDownLoadManager.h; sourceTree = "<group>"; };
@@ -128,6 +131,8 @@
 				0437E80B2368044F00C8B885 /* VideoReCoderTool.m */,
 				04E03DBC236938720047FC43 /* PhotosTool.h */,
 				04E03DBD236938720047FC43 /* PhotosTool.m */,
+				04116DC6238525FA00D8BA48 /* ColorUtils.h */,
+				04116DC7238525FA00D8BA48 /* ColorUtils.m */,
 			);
 			path = Tool;
 			sourceTree = "<group>";
@@ -353,6 +358,7 @@
 				04C803502351CD5C005464B5 /* MissionCell.m in Sources */,
 				04E03DBE236938720047FC43 /* PhotosTool.m in Sources */,
 				04116DC52383ED0300D8BA48 /* WKUrlToModelTransform.m in Sources */,
+				04116DC8238525FB00D8BA48 /* ColorUtils.m in Sources */,
 				046C63B123716668009BFE4A /* YoutubeViewController.m in Sources */,
 				04A78E17235831CE000E1A58 /* InstagramViewController.m in Sources */,
 				045A28BE2373BF750012EB28 /* WKDownLoadManager.m in Sources */,
@@ -526,7 +532,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4QV4GUFD68;
+				DEVELOPMENT_TEAM = LVG757V5R7;
 				INFOPLIST_FILE = InsgramDownLoader/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
